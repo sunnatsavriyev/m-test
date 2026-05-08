@@ -1,0 +1,18 @@
+# Django
+*.pyc
+__pycache__/
+db.sqlite3
+media/
+static/
+backend/.env
+
+# Node
+node_modules/
+dist/
+frontend/.env
+.DS_Store
+
+# Virtual Environment
+venv/
+.venv/
+env/

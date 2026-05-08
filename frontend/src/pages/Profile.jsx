@@ -1,0 +1,128 @@
+import React, { useState } from 'react';
+import axios from 'axios';
+import { useAuth } from '../context/AuthContext';
+import { User, Lock, Save, Camera } from 'lucide-react';
+import { motion } from 'framer-motion';
+
+const Profile = () => {
+  const { user, setUser, API_URL } = useAuth();
+  const [profileData, setProfileData] = useState({
+    first_name: user?.first_name || '',
+    last_name: user?.last_name || '',
+  });
+  const [passData, setPassData] = useState({
+    old_password: '',
+    new_password: '',
+    confirm_password: ''
+  });
+  const [status, setStatus] = useState({ type: '', message: '' });
+
+  const handleProfileUpdate = async (e) => {
+    e.preventDefault();
+    try {
+      const token = localStorage.getItem('access_token');
+      const response = await axios.patch(`${API_URL}users/profile/`, profileData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setUser(prev => ({ ...prev, ...response.data }));
+      setStatus({ type: 'success', message: "Ma'lumotlar saqlandi!" });
+    } catch (err) {
+      setStatus({ type: 'error', message: "Saqlashda xatolik!" });
+    }
+  };
+
+  const handlePasswordChange = async (e) => {
+    e.preventDefault();
+    if (passData.new_password !== passData.confirm_password) {
+      setStatus({ type: 'error', message: "Yangi parollar mos kelmadi!" });
+      return;
+    }
+    try {
+      const token = localStorage.getItem('access_token');
+      await axios.post(`${API_URL}users/change-password/`, {
+        old_password: passData.old_password,
+        new_password: passData.new_password
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setStatus({ type: 'success', message: "Parol o'zgartirildi!" });
+      setPassData({ old_password: '', new_password: '', confirm_password: '' });
+    } catch (err) {
+      setStatus({ type: 'error', message: "Eski parol noto'g'ri!" });
+    }
+  };
+
+  return (
+    <div className="animate-fade-in" style={{ maxWidth: '800px', margin: '0 auto' }}>
+      <header style={{ marginBottom: '32px' }}>
+        <h1 style={{ fontSize: '2.5rem', fontWeight: 700 }}>Profil</h1>
+        <p style={{ color: 'var(--text-muted)' }}>Shaxsiy ma'lumotlarni boshqarish</p>
+      </header>
+
+      {status.message && (
+        <div style={{ 
+          background: status.type === 'success' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', 
+          color: status.type === 'success' ? 'var(--success)' : 'var(--error)', 
+          padding: '16px', borderRadius: 'var(--radius)', marginBottom: '24px', textAlign: 'center' 
+        }}>
+          {status.message}
+        </div>
+      )}
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+        <div className="card glass">
+          <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+            <div style={{ position: 'relative', width: '120px', height: '120px', margin: '0 auto 16px' }}>
+              <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: 'var(--surface-hover)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                {user?.avatar ? <img src={user.avatar} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <User size={64} color="var(--text-muted)" />}
+              </div>
+              <button style={{ position: 'absolute', bottom: '0', right: '0', background: 'var(--primary)', border: 'none', borderRadius: '50%', padding: '8px', color: 'white', cursor: 'pointer' }}>
+                <Camera size={16} />
+              </button>
+            </div>
+            <h3>{user?.first_name} {user?.last_name}</h3>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>{user?.department}</p>
+            <span style={{ display: 'inline-block', marginTop: '8px', padding: '4px 12px', background: 'rgba(99, 102, 241, 0.1)', color: 'var(--primary)', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 600 }}>{user?.role}</span>
+          </div>
+
+          <form onSubmit={handleProfileUpdate}>
+            <div className="input-group">
+              <label>Ism</label>
+              <input type="text" value={profileData.first_name} onChange={e => setProfileData({...profileData, first_name: e.target.value})} />
+            </div>
+            <div className="input-group">
+              <label>Familiya</label>
+              <input type="text" value={profileData.last_name} onChange={e => setProfileData({...profileData, last_name: e.target.value})} />
+            </div>
+            <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>
+              <Save size={18} /> Saqlash
+            </button>
+          </form>
+        </div>
+
+        <div className="card glass">
+          <h2 style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '10px' }}><Lock size={20} /> Parolni o'zgartirish</h2>
+          <form onSubmit={handlePasswordChange}>
+            <div className="input-group">
+              <label>Eski parol</label>
+              <input type="password" value={passData.old_password} onChange={e => setPassData({...passData, old_password: e.target.value})} required />
+            </div>
+            <div className="input-group">
+              <label>Yangi parol</label>
+              <input type="password" value={passData.new_password} onChange={e => setPassData({...passData, new_password: e.target.value})} required />
+            </div>
+            <div className="input-group">
+              <label>Yangi parolni tasdiqlang</label>
+              <input type="password" value={passData.confirm_password} onChange={e => setPassData({...passData, confirm_password: e.target.value})} required />
+            </div>
+            <button type="submit" className="btn btn-secondary" style={{ width: '100%', marginTop: '8px' }}>
+              O'zgartirish
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Profile;
