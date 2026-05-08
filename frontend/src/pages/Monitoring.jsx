@@ -45,7 +45,7 @@ const Monitoring = () => {
     r.user_detail.first_name.toLowerCase().includes(filter.toLowerCase()) ||
     r.user_detail.last_name.toLowerCase().includes(filter.toLowerCase()) ||
     r.test_detail.title.toLowerCase().includes(filter.toLowerCase()) ||
-    r.user_detail.department.toLowerCase().includes(filter.toLowerCase())
+    (r.user_detail.department_name && r.user_detail.department_name.toLowerCase().includes(filter.toLowerCase()))
   );
 
   return (
@@ -62,7 +62,7 @@ const Monitoring = () => {
         <input 
           type="text" 
           placeholder="Ism, xizmat yoki test nomi bo'yicha qidirish..." 
-          style={{ border: 'none', background: 'transparent', padding: '8px' }}
+          style={{ border: 'none', background: 'transparent', padding: '8px', width: '100%' }}
           value={filter}
           onChange={e => setFilter(e.target.value)}
         />
@@ -82,36 +82,46 @@ const Monitoring = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredResults.map(res => (
-              <tr key={res.id} style={{ borderBottom: '1px solid var(--border)', transition: 'var(--transition)' }}>
-                <td style={{ padding: '16px' }}>
-                  <div style={{ fontWeight: 600 }}>{res.user_detail.first_name} {res.user_detail.last_name}</div>
-                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>@{res.user_detail.username}</div>
-                </td>
-                <td style={{ padding: '16px' }}>{res.user_detail.department}</td>
-                <td style={{ padding: '16px' }}>{res.test_detail.title}</td>
-                <td style={{ padding: '16px' }}>
-                  <div style={{ fontWeight: 700, color: res.score >= 60 ? 'var(--success)' : 'var(--error)' }}>{Math.round(res.score)}%</div>
-                </td>
-                <td style={{ padding: '16px', fontSize: '0.85rem' }}>{new Date(res.completed_at).toLocaleDateString()}</td>
-                <td style={{ padding: '16px' }}>
-                  {res.is_cheated ? (
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--error)', fontSize: '0.8rem', fontWeight: 600 }}>
-                      <ShieldAlert size={14} /> Aldash holati ({res.cheat_attempts})
-                    </span>
-                  ) : (
-                    <span style={{ color: 'var(--success)', fontSize: '0.8rem', fontWeight: 600 }}>Toza</span>
-                  )}
-                </td>
-                <td style={{ padding: '16px' }}>
-                  {user?.role === 'super_admin' && (
-                    <button className="btn btn-secondary" style={{ padding: '6px' }} title="Qayta ishlashga ruxsat" onClick={() => resetResult(res.id)}>
-                      <RotateCcw size={16} />
-                    </button>
-                  )}
-                </td>
-              </tr>
-            ))}
+            {filteredResults.map(res => {
+              const scoreColor = res.score >= 60 ? 'var(--success)' : 'var(--error)';
+              
+              return (
+                <tr key={res.id} style={{ borderBottom: '1px solid var(--border)', transition: 'var(--transition)' }}>
+                  <td style={{ padding: '16px' }}>
+                    <div style={{ fontWeight: 600 }}>{res.user_detail.first_name} {res.user_detail.last_name}</div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>@{res.user_detail.username}</div>
+                  </td>
+                  <td style={{ padding: '16px' }}>{res.user_detail.department_name || '—'}</td>
+                  <td style={{ padding: '16px' }}>{res.test_detail.title}</td>
+                  <td style={{ padding: '16px' }}>
+                    <div style={{ fontWeight: 700, color: scoreColor }}>{Math.round(res.score)}%</div>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{res.correct_answers} / {res.total_questions}</div>
+                  </td>
+                  <td style={{ padding: '16px', fontSize: '0.85rem' }}>{new Date(res.completed_at).toLocaleDateString()}</td>
+                  <td style={{ padding: '16px' }}>
+                    {res.is_cheated ? (
+                      <div style={{ color: 'var(--error)', fontSize: '0.8rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600 }}>
+                          <ShieldAlert size={14} /> Aldash holati ({res.cheat_attempts})
+                        </div>
+                        <div style={{ fontSize: '0.7rem', opacity: 0.8, marginTop: '2px' }}>
+                          {res.cheat_details || 'Noma\'lum sabab'}
+                        </div>
+                      </div>
+                    ) : (
+                      <span style={{ color: 'var(--success)', fontSize: '0.8rem', fontWeight: 600 }}>Toza</span>
+                    )}
+                  </td>
+                  <td style={{ padding: '16px' }}>
+                    {user?.role === 'super_admin' && (
+                      <button className="btn btn-secondary" style={{ padding: '6px' }} title="Qayta ishlashga ruxsat" onClick={() => resetResult(res.id)}>
+                        <RotateCcw size={16} />
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

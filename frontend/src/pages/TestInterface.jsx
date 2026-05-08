@@ -5,10 +5,13 @@ import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Clock, AlertTriangle, CheckCircle } from 'lucide-react';
 
+import { useToast } from '../components/Toast';
+
 const TestInterface = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { API_URL } = useAuth();
+  const { addToast } = useToast();
   const [test, setTest] = useState(null);
   const [questions, setQuestions] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -16,11 +19,35 @@ const TestInterface = () => {
   const [timeLeft, setTimeLeft] = useState(0);
   const [cheatAttempts, setCheatAttempts] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
+  const [result, setResult] = useState(null);
   const [showWarning, setShowWarning] = useState(false);
+  const [resultId, setResultId] = useState(null);
+  const [sessionToken, setSessionToken] = useState(localStorage.getItem(`test_session_${id}`));
+  const hasStarted = React.useRef(false);
+
+  const isTimeLow = timeLeft < 60;
 
   const fetchTestData = useCallback(async () => {
+    if (hasStarted.current) return;
+    hasStarted.current = true;
+
     try {
       const token = localStorage.getItem('access_token');
+      
+      // Avval testni boshlash/davom ettirishni tekshirish
+      const startRes = await axios.post(`${API_URL}results/start/`, {
+        test_id: id,
+        session_token: sessionToken
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      setResultId(startRes.data.result_id);
+      if (startRes.data.session_token) {
+        setSessionToken(startRes.data.session_token);
+        localStorage.setItem(`test_session_${id}`, startRes.data.session_token);
+      }
+
       const testRes = await axios.get(`${API_URL}tests/${id}/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -33,30 +60,41 @@ const TestInterface = () => {
       setQuestions(questRes.data);
     } catch (err) {
       console.error(err);
+      hasStarted.current = false; // Xatolik bo'lsa qaytadan urinishga ruxsat
+      const errorMsg = err.response?.data?.error || "Testni boshlashda xatolik yuz berdi";
+      addToast(errorMsg, "error");
       navigate('/tests');
     }
-  }, [id, API_URL, navigate]);
+  }, [id, API_URL, navigate, sessionToken, addToast]);
 
   useEffect(() => {
     fetchTestData();
-  }, [fetchTestData]);
+  }, []); // Only once on mount
 
-  const submitTest = useCallback(async (cheated = false) => {
+  const submitTest = useCallback(async (cheated = false, details = '') => {
     try {
       const token = localStorage.getItem('access_token');
-      await axios.post(`${API_URL}results/submit/`, {
+      const response = await axios.post(`${API_URL}results/submit/`, {
         test_id: id,
+        result_id: resultId,
+        session_token: sessionToken,
         answers: answers,
+        question_ids: questions.map(q => q.id),
         is_cheated: cheated || cheatAttempts > 0,
-        cheat_attempts: cheatAttempts
+        cheat_attempts: cheated ? cheatAttempts + 1 : cheatAttempts,
+        cheat_details: details || (cheatAttempts > 0 ? "Browserdan chiqishga urinishlar" : "")
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      setResult(response.data);
       setIsFinished(true);
+      localStorage.removeItem(`test_session_${id}`);
+      addToast("Test muvaffaqiyatli yakunlandi!", "success");
     } catch (err) {
-      alert("Natijani saqlashda xatolik!");
+      console.error(err);
+      addToast("Natijani saqlashda xatolik yuz berdi!", "error");
     }
-  }, [id, answers, cheatAttempts, API_URL]);
+  }, [id, answers, questions, cheatAttempts, API_URL, resultId, sessionToken, addToast]);
 
   // Anti-Cheat Logic
   useEffect(() => {
@@ -67,7 +105,7 @@ const TestInterface = () => {
           if (next === 1) {
             setShowWarning(true);
           } else if (next >= 2) {
-            submitTest(true);
+            submitTest(true, "Browserdan chiqdi (Avtomatik yakunlash)");
           }
           return next;
         });
@@ -107,11 +145,67 @@ const TestInterface = () => {
 
   if (isFinished) {
     return (
-      <div style={{ height: '80vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-        <CheckCircle size={80} color="var(--success)" style={{ marginBottom: '24px' }} />
-        <h1 style={{ marginBottom: '12px' }}>Test yakunlandi!</h1>
-        <p style={{ color: 'var(--text-muted)', marginBottom: '32px' }}>Natijangiz saqlandi. Monitoring bo'limidan ko'rishingiz mumkin.</p>
-        <button className="btn btn-primary" onClick={() => navigate('/tests')}>Testlar ro'yxatiga qaytish</button>
+      <div className="test-container animate-fade-in" style={{ maxWidth: '800px' }}>
+        <div className="card glass" style={{ textAlign: 'center', padding: '48px', marginBottom: '32px' }}>
+          <CheckCircle size={80} color="var(--success)" style={{ marginBottom: '24px' }} />
+          <h1 style={{ marginBottom: '12px' }}>Test yakunlandi!</h1>
+          <div style={{ fontSize: '3rem', fontWeight: 800, color: 'var(--primary)', marginBottom: '8px' }}>
+            {result?.score}%
+          </div>
+          <p style={{ color: 'var(--text-muted)', fontSize: '1.2rem', marginBottom: '32px' }}>
+            {result?.correct_answers} ta to'g'ri javob ({result?.total_questions} tadan)
+          </p>
+          <button className="btn btn-primary" onClick={() => navigate('/tests')}>Asosiy sahifaga qaytish</button>
+        </div>
+
+        <h2 style={{ marginBottom: '24px' }}>Savollar tahlili</h2>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {questions.map((q, idx) => {
+            const userAnswer = answers[q.id];
+            const answerDetail = result?.answers?.find(a => a.question === q.id);
+            const correctChoiceId = answerDetail?.correct_choice;
+
+            return (
+              <div key={q.id} className="card glass" style={{ borderLeft: `4px solid ${answerDetail?.is_correct ? 'var(--success)' : 'var(--error)'}` }}>
+                <h3 style={{ fontSize: '1.1rem', marginBottom: '16px' }}>{idx + 1}. {q.text}</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {q.choices.map(choice => {
+                    const isSelected = userAnswer === choice.id;
+                    const isCorrect = choice.id === correctChoiceId;
+                    
+                    let bg = 'transparent';
+                    let border = '1px solid var(--border)';
+                    if (isCorrect) {
+                      bg = 'rgba(16, 185, 129, 0.1)';
+                      border = '1px solid var(--success)';
+                    } else if (isSelected && !isCorrect) {
+                      bg = 'rgba(239, 68, 68, 0.1)';
+                      border = '1px solid var(--error)';
+                    }
+
+                    return (
+                      <div key={choice.id} style={{ padding: '12px 16px', borderRadius: '8px', background: bg, border: border, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span>{choice.text}</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          {isCorrect && <span style={{ fontSize: '0.7rem', color: 'var(--success)', fontWeight: 700 }}>TO'G'RI</span>}
+                          {isSelected && !isCorrect && <span style={{ fontSize: '0.7rem', color: 'var(--error)', fontWeight: 700 }}>SIZNING JAVOB</span>}
+                          {isCorrect && <CheckCircle size={16} color="var(--success)" />}
+                          {isSelected && !isCorrect && <AlertTriangle size={16} color="var(--error)" />}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                {answerDetail?.explanation && (
+                  <div style={{ marginTop: '20px', padding: '16px', background: 'rgba(99, 102, 241, 0.05)', borderRadius: '12px', border: '1px solid rgba(99, 102, 241, 0.2)' }}>
+                    <p style={{ fontSize: '0.85rem', color: 'var(--primary)', fontWeight: 700, marginBottom: '4px' }}>Izoh:</p>
+                    <p style={{ fontSize: '0.9rem', color: 'var(--text)', lineHeight: 1.5 }}>{answerDetail.explanation}</p>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
     );
   }
@@ -125,7 +219,7 @@ const TestInterface = () => {
           <h2 style={{ fontSize: '1.2rem' }}>{test.title}</h2>
           <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Savol {currentIndex + 1} / {questions.length}</p>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: timeLeft < 60 ? 'rgba(239, 68, 68, 0.1)' : 'rgba(99, 102, 241, 0.1)', padding: '8px 16px', borderRadius: 'var(--radius)', color: timeLeft < 60 ? 'var(--error)' : 'var(--primary)', fontWeight: 700 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: isTimeLow ? 'rgba(239, 68, 68, 0.1)' : 'rgba(99, 102, 241, 0.1)', padding: '8px 16px', borderRadius: 'var(--radius)', color: isTimeLow ? 'var(--error)' : 'var(--primary)', fontWeight: 700 }}>
           <Clock size={20} />
           <span>{formatTime(timeLeft)}</span>
         </div>
@@ -171,16 +265,33 @@ const TestInterface = () => {
         </motion.div>
       </AnimatePresence>
 
-      {showWarning && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-          <div className="card glass" style={{ width: '100%', maxWidth: '400px', textAlign: 'center' }}>
-            <AlertTriangle size={64} color="var(--warning)" style={{ marginBottom: '24px' }} />
-            <h2 style={{ marginBottom: '12px' }}>Ogohlantirish!</h2>
-            <p style={{ color: 'var(--text-muted)', marginBottom: '24px' }}>Siz test sahifasidan chiqdingiz. Agar yana bir bor shunday holat takrorlansa, test avtomatik yakunlanadi!</p>
-            <button className="btn btn-primary" style={{ width: '100%' }} onClick={() => setShowWarning(false)}>Tushundim</button>
-          </div>
-        </div>
-      )}
+      <AnimatePresence>
+        {showWarning && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000, padding: '20px' }}
+          >
+            <motion.div 
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="card glass" 
+              style={{ width: '100%', maxWidth: '450px', textAlign: 'center', padding: '40px' }}
+            >
+              <div style={{ background: 'rgba(245, 158, 11, 0.1)', width: '80px', height: '80px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
+                <AlertTriangle size={40} color="var(--warning)" />
+              </div>
+              <h2 style={{ marginBottom: '16px', fontSize: '1.8rem', fontWeight: 800 }}>DIQQAT!</h2>
+              <p style={{ color: 'var(--text)', fontSize: '1.1rem', marginBottom: '32px', lineHeight: 1.6 }}>
+                Siz test sahifasidan chiqdingiz. Agar yana bir bor shunday holat takrorlansa, test <span style={{ color: 'var(--error)', fontWeight: 700 }}>avtomatik yakunlanadi</span> va ballingiz pasaytirilishi mumkin!
+              </p>
+              <button className="btn btn-primary" style={{ width: '100%', padding: '16px' }} onClick={() => setShowWarning(false)}>TUSHUNDIM, DAVOM ETAMAN</button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

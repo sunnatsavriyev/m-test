@@ -23,11 +23,11 @@ const Sidebar = () => {
       </div>
 
       <div className="menu">
-        {menuItems.filter(item => item.roles.includes(user?.role)).map((item, index) => (
+        {menuItems.filter(item => user && item.roles.includes(user.role)).map((item, index) => (
           <NavLink 
             key={index} 
             to={item.path} 
-            className={({ isActive }) => `btn btn-secondary ${isActive ? 'btn-primary' : ''}`}
+            className={({ isActive }) => isActive ? "btn btn-primary" : "btn btn-secondary"}
             style={{ width: '100%', marginBottom: '12px', justifyContent: 'flex-start', border: 'none' }}
           >
             {item.icon}
@@ -37,6 +37,25 @@ const Sidebar = () => {
       </div>
 
       <div className="logout" style={{ position: 'absolute', bottom: '24px', left: '24px', right: '24px' }}>
+        {user && (
+          <div style={{ marginBottom: '24px', padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '12px', border: '1px solid var(--border)' }}>
+            <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+              {user.avatar ? (
+                <img src={user.avatar} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : (
+                <UserCircle size={24} color="white" />
+              )}
+            </div>
+            <div style={{ overflow: 'hidden' }}>
+              <div style={{ fontSize: '0.85rem', fontWeight: 700, whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                {user.first_name} {user.last_name}
+              </div>
+              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'capitalize' }}>
+                {user.role ? user.role.replace('_', ' ') : ''}
+              </div>
+            </div>
+          </div>
+        )}
         <button className="btn btn-secondary" style={{ width: '100%', color: 'var(--error)' }} onClick={logout}>
           <LogOut size={20} />
           <span>Chiqish</span>

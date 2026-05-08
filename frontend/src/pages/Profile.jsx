@@ -17,6 +17,28 @@ const Profile = () => {
   });
   const [status, setStatus] = useState({ type: '', message: '' });
 
+  const handleAvatarChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('avatar', file);
+
+    try {
+      const token = localStorage.getItem('access_token');
+      const response = await axios.patch(`${API_URL}users/profile/`, formData, {
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      setUser(prev => ({ ...prev, avatar: response.data.avatar }));
+      setStatus({ type: 'success', message: "Profil rasmi yangilandi!" });
+    } catch (err) {
+      setStatus({ type: 'error', message: "Rasm yuklashda xatolik!" });
+    }
+  };
+
   const handleProfileUpdate = async (e) => {
     e.preventDefault();
     try {
@@ -76,13 +98,41 @@ const Profile = () => {
               <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: 'var(--surface-hover)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                 {user?.avatar ? <img src={user.avatar} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <User size={64} color="var(--text-muted)" />}
               </div>
-              <button style={{ position: 'absolute', bottom: '0', right: '0', background: 'var(--primary)', border: 'none', borderRadius: '50%', padding: '8px', color: 'white', cursor: 'pointer' }}>
-                <Camera size={16} />
-              </button>
+              <label 
+                htmlFor="avatar-upload" 
+                style={{ 
+                  position: 'absolute', 
+                  bottom: '0', 
+                  right: '0', 
+                  background: 'var(--primary)', 
+                  border: 'none', 
+                  borderRadius: '50%', 
+                  padding: '10px', 
+                  color: 'white', 
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'var(--transition)'
+                }}
+                className="btn-hover"
+              >
+                <Camera size={18} />
+                <input 
+                  id="avatar-upload" 
+                  type="file" 
+                  hidden 
+                  accept="image/*" 
+                  onChange={handleAvatarChange} 
+                />
+              </label>
             </div>
-            <h3>{user?.first_name} {user?.last_name}</h3>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>{user?.department}</p>
-            <span style={{ display: 'inline-block', marginTop: '8px', padding: '4px 12px', background: 'rgba(99, 102, 241, 0.1)', color: 'var(--primary)', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 600 }}>{user?.role}</span>
+            <h3 style={{ textTransform: 'capitalize' }}>{user?.first_name} {user?.last_name}</h3>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>{user?.department_name || 'Xizmat biriktirilmagan'}</p>
+            <span style={{ display: 'inline-block', marginTop: '8px', padding: '4px 12px', background: 'rgba(99, 102, 241, 0.1)', color: 'var(--primary)', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 700, textTransform: 'capitalize' }}>
+              {user?.role ? user.role.replace('_', ' ') : ''}
+            </span>
           </div>
 
           <form onSubmit={handleProfileUpdate}>
