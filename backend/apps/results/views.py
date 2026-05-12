@@ -15,11 +15,14 @@ class ResultViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        if user.role == 'super_admin' or user.role == 'monitoring':
-            return TestResult.objects.all().order_by('-completed_at')
-        elif user.role == 'dept_head':
-            return TestResult.objects.filter(user__department=user.department).order_by('-completed_at')
-        return TestResult.objects.filter(user=user).order_by('-completed_at')
+        qs = TestResult.objects.all().order_by('-completed_at')
+        
+        if user.role == 'dept_head':
+            qs = qs.filter(user__department=user.department)
+        elif user.role != 'super_admin' and user.role != 'monitoring':
+            qs = qs.filter(user=user)
+        
+        return qs
 
 class TestStartView(APIView):
     def post(self, request):
@@ -33,9 +36,27 @@ class TestStartView(APIView):
             except Test.DoesNotExist:
                 return Response({'error': 'Test topilmadi'}, status=status.HTTP_404_NOT_FOUND)
             
-            # Faqat aynan shu test uchun tugallanmagan sessionni tekshirish
-            active_result = TestResult.objects.filter(user=request.user, test_id=test_id, is_finished=False).first()
+            # Check for ANY existing result
+            existing_results = TestResult.objects.filter(user=request.user, test_id=test_id)
             
+            # 1. Agar foydalanuvchi testni topshirib bo'lgan bo'lsa
+            if existing_results.filter(is_finished=True).exists():
+                # Admin ruxsat berganmi tekshiramiz (session_token == 'ALLOWED_RETAKE')
+                permission_given = existing_results.filter(is_finished=True, session_token='ALLOWED_RETAKE').first()
+                
+                if permission_given:
+                    # Ruxsatni ishlatamiz (tokenni o'zgartirib qo'yamiz)
+                    permission_given.session_token = 'RETAKE_USED'
+                    permission_given.save()
+                    # Yangi seans yaratishga o'tamiz (pastdagi logic)
+                else:
+                    return Response({
+                        'error': 'Siz ushbu testni topshirib bo\'lgansiz. Qayta topshirish uchun adminga murojaat qiling.',
+                        'already_finished': True
+                    }, status=status.HTTP_403_FORBIDDEN)
+            
+            # 2. Agar test hali topshirilayotgan bo'lsa (active session)
+            active_result = existing_results.filter(is_finished=False).first()
             if active_result:
                 # Session_token'ni tekshirish
                 if active_result.session_token and incoming_token != active_result.session_token:
@@ -181,7 +202,9 @@ class ResetResultView(APIView):
         
         try:
             result = TestResult.objects.get(pk=pk)
-            result.delete()
-            return Response({'message': 'Result reset successfully'}, status=status.HTTP_200_OK)
+            # Natijani o'chirmaymiz, shunchaki yangi urinishga ruxsat berish uchun belgi qo'yamiz
+            result.session_token = 'ALLOWED_RETAKE'
+            result.save()
+            return Response({'message': 'Qayta topshirishga ruxsat berildi'}, status=status.HTTP_200_OK)
         except TestResult.DoesNotExist:
-            return Response({'error': 'Result not found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'Natija topilmadi'}, status=status.HTTP_404_NOT_FOUND)

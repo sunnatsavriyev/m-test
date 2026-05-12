@@ -80,9 +80,9 @@ const TestInterface = () => {
         session_token: sessionToken,
         answers: answers,
         question_ids: questions.map(q => q.id),
-        is_cheated: cheated || cheatAttempts > 0,
-        cheat_attempts: cheated ? cheatAttempts + 1 : cheatAttempts,
-        cheat_details: details || (cheatAttempts > 0 ? "Browserdan chiqishga urinishlar" : "")
+        is_cheated: cheated, // Faqatgina majburiy yakunlanganda (2-marta chiqqanda) true bo'ladi
+        cheat_attempts: cheatAttempts,
+        cheat_details: cheated ? details : ""
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -145,11 +145,24 @@ const TestInterface = () => {
 
   if (isFinished) {
     return (
-      <div className="test-container animate-fade-in" style={{ maxWidth: '800px' }}>
+      <div className="test-container animate-fade-in" style={{ maxWidth: '800px', padding: '0 20px' }}>
         <div className="card glass" style={{ textAlign: 'center', padding: '48px', marginBottom: '32px' }}>
-          <CheckCircle size={80} color="var(--success)" style={{ marginBottom: '24px' }} />
-          <h1 style={{ marginBottom: '12px' }}>Test yakunlandi!</h1>
-          <div style={{ fontSize: '3rem', fontWeight: 800, color: 'var(--primary)', marginBottom: '8px' }}>
+          {result?.is_cheated ? (
+            <>
+              <AlertTriangle size={80} color="var(--error)" style={{ margin: '0 auto 24px' }} />
+              <h1 style={{ marginBottom: '12px', color: 'var(--error)' }}>Test avtomatik yakunlandi!</h1>
+              <p style={{ color: 'var(--text-muted)', fontSize: '1.2rem', marginBottom: '16px' }}>
+                Qoidabuzarlik (brauzerdan chiqish) sababli test to'xtatildi.
+              </p>
+            </>
+          ) : (
+            <>
+              <CheckCircle size={80} color="var(--success)" style={{ margin: '0 auto 24px' }} />
+              <h1 style={{ marginBottom: '12px' }}>Test yakunlandi!</h1>
+            </>
+          )}
+          
+          <div style={{ fontSize: '3rem', fontWeight: 800, color: result?.is_cheated ? 'var(--error)' : 'var(--primary)', marginBottom: '8px' }}>
             {result?.score}%
           </div>
           <p style={{ color: 'var(--text-muted)', fontSize: '1.2rem', marginBottom: '32px' }}>

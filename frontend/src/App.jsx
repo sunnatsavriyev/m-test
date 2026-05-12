@@ -12,6 +12,7 @@ import TestCreate from './pages/TestCreate';
 import TestInterface from './pages/TestInterface';
 import Profile from './pages/Profile';
 import ResultDetail from './pages/ResultDetail';
+import TestHistory from './pages/TestHistory';
 import Sidebar from './components/Sidebar';
 import { ToastProvider } from './components/Toast';
 
@@ -83,7 +84,7 @@ const AppContent = () => {
           } />
 
           <Route path="/test/:id" element={
-            <ProtectedRoute allowedRoles={['employee', 'dept_head']}>
+            <ProtectedRoute allowedRoles={['employee', 'dept_head', 'super_admin']}>
               <TestInterface />
             </ProtectedRoute>
           } />
@@ -97,6 +98,12 @@ const AppContent = () => {
           <Route path="/result/:id" element={
             <ProtectedRoute>
               <ResultDetail />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/test/:id/history" element={
+            <ProtectedRoute>
+              <TestHistory />
             </ProtectedRoute>
           } />
         </Routes>
