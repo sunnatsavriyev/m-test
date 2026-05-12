@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
-import { Search, RotateCcw, ShieldAlert } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Search, RotateCcw, ShieldAlert, Eye } from 'lucide-react';
 
 const Monitoring = () => {
   const { API_URL, user } = useAuth();
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('');
+  const navigate = useNavigate();
 
   const fetchResults = async () => {
     try {
@@ -113,11 +115,27 @@ const Monitoring = () => {
                     )}
                   </td>
                   <td style={{ padding: '16px' }}>
-                    {user?.role === 'super_admin' && (
-                      <button className="btn btn-secondary" style={{ padding: '6px' }} title="Qayta ishlashga ruxsat" onClick={() => resetResult(res.id)}>
-                        <RotateCcw size={16} />
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button 
+                        className="btn btn-secondary" 
+                        style={{ padding: '6px', background: 'rgba(99, 102, 241, 0.1)', color: 'var(--primary)', border: 'none' }} 
+                        title="Batafsil ko'rish" 
+                        onClick={() => navigate(`/result/${res.id}`)}
+                      >
+                        <Eye size={16} />
                       </button>
-                    )}
+                      
+                      {user?.role === 'super_admin' && (
+                        <button 
+                          className="btn btn-secondary" 
+                          style={{ padding: '6px' }} 
+                          title="Qayta ishlashga ruxsat" 
+                          onClick={() => resetResult(res.id)}
+                        >
+                          <RotateCcw size={16} />
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               );
