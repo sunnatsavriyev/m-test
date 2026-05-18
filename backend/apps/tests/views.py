@@ -26,6 +26,21 @@ class TestViewSet(viewsets.ModelViewSet):
             )
         return Test.objects.none()
 
+    def destroy(self, request, *args, **kwargs):
+        if request.user.role not in ['super_admin', 'dept_head']:
+            return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+        return super().destroy(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        if request.user.role not in ['super_admin', 'dept_head']:
+            return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+        return super().update(request, *args, **kwargs)
+        
+    def partial_update(self, request, *args, **kwargs):
+        if request.user.role not in ['super_admin', 'dept_head']:
+            return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+        return super().partial_update(request, *args, **kwargs)
+
 class TestUploadView(APIView):
     parser_classes = (MultiPartParser, FormParser)
     

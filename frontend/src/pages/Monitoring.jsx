@@ -3,9 +3,12 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Search, RotateCcw, ShieldAlert, Eye } from 'lucide-react';
+import Loading from '../components/Loading';
+import { useSettings } from '../context/SettingsContext';
 
 const Monitoring = () => {
   const { API_URL, user } = useAuth();
+  const { t, language } = useSettings();
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('');
@@ -30,7 +33,7 @@ const Monitoring = () => {
   }, []);
 
   const resetResult = async (id) => {
-    if (window.confirm("Haqiqatdan bu natijani o'chirib, qayta topshirishga ruxsat bermoqchimisiz?")) {
+    if (window.confirm(t('reset_confirm'))) {
       try {
         const token = localStorage.getItem('access_token');
         await axios.post(`${API_URL}results/${id}/reset/`, {}, {
@@ -38,7 +41,7 @@ const Monitoring = () => {
         });
         fetchResults();
       } catch (err) {
-        alert("Xatolik yuz berdi!");
+        alert(t('error'));
       }
     }
   };
@@ -50,12 +53,14 @@ const Monitoring = () => {
     (r.user_detail.department_name && r.user_detail.department_name.toLowerCase().includes(filter.toLowerCase()))
   );
 
+  if (loading) return <Loading fullPage={false} />;
+
   return (
     <div className="animate-fade-in">
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
         <div>
-          <h1 style={{ fontSize: '2.5rem', fontWeight: 700 }}>Monitoring</h1>
-          <p style={{ color: 'var(--text-muted)' }}>Test natijalari va statistikasi</p>
+          <h1 style={{ fontSize: '2.5rem', fontWeight: 700 }}>{t('mon_title')}</h1>
+          <p style={{ color: 'var(--text-muted)' }}>{t('mon_subtitle')}</p>
         </div>
       </header>
 
@@ -63,7 +68,7 @@ const Monitoring = () => {
         <Search size={20} color="var(--text-muted)" />
         <input 
           type="text" 
-          placeholder="Ism, xizmat yoki test nomi bo'yicha qidirish..." 
+          placeholder={t('search_placeholder')} 
           style={{ border: 'none', background: 'transparent', padding: '8px', width: '100%' }}
           value={filter}
           onChange={e => setFilter(e.target.value)}
@@ -74,13 +79,13 @@ const Monitoring = () => {
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead>
             <tr style={{ background: 'var(--surface)', borderBottom: '1px solid var(--border)' }}>
-              <th style={{ padding: '16px' }}>Foydalanuvchi</th>
-              <th style={{ padding: '16px' }}>Xizmat</th>
-              <th style={{ padding: '16px' }}>Test</th>
-              <th style={{ padding: '16px' }}>Natija</th>
-              <th style={{ padding: '16px' }}>Sana</th>
-              <th style={{ padding: '16px' }}>Status</th>
-              <th style={{ padding: '16px' }}>Amallar</th>
+              <th style={{ padding: '16px' }}>{t('user')}</th>
+              <th style={{ padding: '16px' }}>{t('service')}</th>
+              <th style={{ padding: '16px' }}>{t('test')}</th>
+              <th style={{ padding: '16px' }}>{t('score')}</th>
+              <th style={{ padding: '16px' }}>{t('date')}</th>
+              <th style={{ padding: '16px' }}>{t('status')}</th>
+              <th style={{ padding: '16px' }}>{t('actions')}</th>
             </tr>
           </thead>
           <tbody>
@@ -104,14 +109,14 @@ const Monitoring = () => {
                     {res.is_cheated ? (
                       <div style={{ color: 'var(--error)', fontSize: '0.8rem' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600 }}>
-                          <ShieldAlert size={14} /> Aldash holati ({res.cheat_attempts})
+                          <ShieldAlert size={14} /> {t('cheated')} ({res.cheat_attempts})
                         </div>
                         <div style={{ fontSize: '0.7rem', opacity: 0.8, marginTop: '2px' }}>
-                          {res.cheat_details || 'Noma\'lum sabab'}
+                          {res.cheat_details || (language === 'uz' ? 'Noma\'lum sabab' : language === 'ru' ? 'Неизвестная причина' : 'Unknown reason')}
                         </div>
                       </div>
                     ) : (
-                      <span style={{ color: 'var(--success)', fontSize: '0.8rem', fontWeight: 600 }}>Toza</span>
+                      <span style={{ color: 'var(--success)', fontSize: '0.8rem', fontWeight: 600 }}>{t('clean')}</span>
                     )}
                   </td>
                   <td style={{ padding: '16px' }}>

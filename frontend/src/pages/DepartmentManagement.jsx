@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { Building2, Plus, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import Loading from '../components/Loading';
 
 const DepartmentManagement = () => {
   const { API_URL } = useAuth();
@@ -56,6 +57,8 @@ const DepartmentManagement = () => {
       }
     }
   };
+
+  if (loading) return <Loading fullPage={false} />;
 
   return (
     <div className="animate-fade-in" style={{ maxWidth: '800px' }}>

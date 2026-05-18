@@ -1,18 +1,21 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LayoutDashboard, Users, LineChart, FileText, UserCircle, LogOut, Building2 } from 'lucide-react';
+import { LayoutDashboard, Users, LineChart, FileText, UserCircle, LogOut, Building2, Settings } from 'lucide-react';
+import { useSettings } from '../context/SettingsContext';
 
 const Sidebar = () => {
   const { user, logout } = useAuth();
+  const { t } = useSettings();
 
   const menuItems = [
-    { title: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/', roles: ['super_admin', 'monitoring', 'dept_head', 'employee'] },
-    { title: 'Xodimlar', icon: <Users size={20} />, path: '/users', roles: ['super_admin'] },
-    { title: 'Xizmatlar', icon: <Building2 size={20} />, path: '/departments', roles: ['super_admin'] },
-    { title: 'Monitoring', icon: <LineChart size={20} />, path: '/monitoring', roles: ['super_admin', 'monitoring', 'dept_head'] },
-    { title: 'Testlar', icon: <FileText size={20} />, path: '/tests', roles: ['employee', 'dept_head', 'super_admin'] },
-    { title: 'Profil', icon: <UserCircle size={20} />, path: '/profile', roles: ['super_admin', 'monitoring', 'dept_head', 'employee'] },
+    { title: t('dashboard'), icon: <LayoutDashboard size={20} />, path: '/', roles: ['super_admin', 'monitoring', 'dept_head', 'employee'] },
+    { title: t('employees'), icon: <Users size={20} />, path: '/users', roles: ['super_admin'] },
+    { title: t('departments'), icon: <Building2 size={20} />, path: '/departments', roles: ['super_admin'] },
+    { title: t('monitoring'), icon: <LineChart size={20} />, path: '/monitoring', roles: ['super_admin', 'monitoring', 'dept_head'] },
+    { title: t('tests'), icon: <FileText size={20} />, path: '/tests', roles: ['employee', 'dept_head', 'super_admin'] },
+    { title: t('profile'), icon: <UserCircle size={20} />, path: '/profile', roles: ['super_admin', 'monitoring', 'dept_head', 'employee'] },
+    { title: t('settings'), icon: <Settings size={20} />, path: '/settings', roles: ['super_admin', 'monitoring', 'dept_head', 'employee'] },
   ];
 
   return (
@@ -58,7 +61,7 @@ const Sidebar = () => {
         )}
         <button className="btn btn-secondary" style={{ width: '100%', color: 'var(--error)' }} onClick={logout}>
           <LogOut size={20} />
-          <span>Chiqish</span>
+          <span>{t('logout')}</span>
         </button>
       </div>
     </div>

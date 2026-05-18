@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Clock, AlertTriangle, CheckCircle } from 'lucide-react';
 
 import { useToast } from '../components/Toast';
+import Loading from '../components/Loading';
 
 const TestInterface = () => {
   const { id } = useParams();
@@ -141,7 +142,7 @@ const TestInterface = () => {
     return `${m}:${s < 10 ? '0' : ''}${s}`;
   };
 
-  if (!test || questions.length === 0) return <div>Yuklanmoqda...</div>;
+  if (!test || questions.length === 0) return <Loading />;
 
   if (isFinished) {
     return (

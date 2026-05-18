@@ -3,9 +3,11 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { User, Lock, Save, Camera } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useSettings } from '../context/SettingsContext';
 
 const Profile = () => {
   const { user, setUser, API_URL } = useAuth();
+  const { t, language } = useSettings();
   const [profileData, setProfileData] = useState({
     first_name: user?.first_name || '',
     last_name: user?.last_name || '',
@@ -28,14 +30,13 @@ const Profile = () => {
       const token = localStorage.getItem('access_token');
       const response = await axios.patch(`${API_URL}users/profile/`, formData, {
         headers: { 
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data'
+          Authorization: `Bearer ${token}`
         }
       });
       setUser(prev => ({ ...prev, avatar: response.data.avatar }));
-      setStatus({ type: 'success', message: "Profil rasmi yangilandi!" });
+      setStatus({ type: 'success', message: t('avatar_success') });
     } catch (err) {
-      setStatus({ type: 'error', message: "Rasm yuklashda xatolik!" });
+      setStatus({ type: 'error', message: language === 'uz' ? 'Rasm yuklashda xatolik!' : language === 'ru' ? 'Ошибка загрузки изображения!' : 'Error uploading image!' });
     }
   };
 
@@ -47,16 +48,16 @@ const Profile = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUser(prev => ({ ...prev, ...response.data }));
-      setStatus({ type: 'success', message: "Ma'lumotlar saqlandi!" });
+      setStatus({ type: 'success', message: t('profile_success') });
     } catch (err) {
-      setStatus({ type: 'error', message: "Saqlashda xatolik!" });
+      setStatus({ type: 'error', message: t('error') });
     }
   };
 
   const handlePasswordChange = async (e) => {
     e.preventDefault();
     if (passData.new_password !== passData.confirm_password) {
-      setStatus({ type: 'error', message: "Yangi parollar mos kelmadi!" });
+      setStatus({ type: 'error', message: language === 'uz' ? 'Yangi parollar mos kelmadi!' : language === 'ru' ? 'Новые пароли не совпадают!' : 'New passwords do not match!' });
       return;
     }
     try {
@@ -67,18 +68,18 @@ const Profile = () => {
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setStatus({ type: 'success', message: "Parol o'zgartirildi!" });
+      setStatus({ type: 'success', message: t('password_success') });
       setPassData({ old_password: '', new_password: '', confirm_password: '' });
     } catch (err) {
-      setStatus({ type: 'error', message: "Eski parol noto'g'ri!" });
+      setStatus({ type: 'error', message: language === 'uz' ? "Eski parol noto'g'ri!" : language === 'ru' ? "Неверный старый пароль!" : "Incorrect old password!" });
     }
   };
 
   return (
     <div className="animate-fade-in" style={{ maxWidth: '800px', margin: '0 auto' }}>
       <header style={{ marginBottom: '32px' }}>
-        <h1 style={{ fontSize: '2.5rem', fontWeight: 700 }}>Profil</h1>
-        <p style={{ color: 'var(--text-muted)' }}>Shaxsiy ma'lumotlarni boshqarish</p>
+        <h1 style={{ fontSize: '2.5rem', fontWeight: 700 }}>{t('profile_title')}</h1>
+        <p style={{ color: 'var(--text-muted)' }}>{t('profile_subtitle')}</p>
       </header>
 
       {status.message && (
@@ -129,44 +130,44 @@ const Profile = () => {
               </label>
             </div>
             <h3 style={{ textTransform: 'capitalize' }}>{user?.first_name} {user?.last_name}</h3>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>{user?.department_name || 'Xizmat biriktirilmagan'}</p>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>{user?.department_name || t('no_dept')}</p>
             <span style={{ display: 'inline-block', marginTop: '8px', padding: '4px 12px', background: 'rgba(99, 102, 241, 0.1)', color: 'var(--primary)', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 700, textTransform: 'capitalize' }}>
               {user?.role ? user.role.replace('_', ' ') : ''}
             </span>
           </div>
-
+ 
           <form onSubmit={handleProfileUpdate}>
             <div className="input-group">
-              <label>Ism</label>
+              <label>{t('first_name')}</label>
               <input type="text" value={profileData.first_name} onChange={e => setProfileData({...profileData, first_name: e.target.value})} />
             </div>
             <div className="input-group">
-              <label>Familiya</label>
+              <label>{t('last_name')}</label>
               <input type="text" value={profileData.last_name} onChange={e => setProfileData({...profileData, last_name: e.target.value})} />
             </div>
             <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>
-              <Save size={18} /> Saqlash
+              <Save size={18} /> {t('save')}
             </button>
           </form>
         </div>
 
         <div className="card glass">
-          <h2 style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '10px' }}><Lock size={20} /> Parolni o'zgartirish</h2>
+          <h2 style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '10px' }}><Lock size={20} /> {t('change_password')}</h2>
           <form onSubmit={handlePasswordChange}>
             <div className="input-group">
-              <label>Eski parol</label>
+              <label>{t('old_password')}</label>
               <input type="password" value={passData.old_password} onChange={e => setPassData({...passData, old_password: e.target.value})} required />
             </div>
             <div className="input-group">
-              <label>Yangi parol</label>
+              <label>{t('new_password')}</label>
               <input type="password" value={passData.new_password} onChange={e => setPassData({...passData, new_password: e.target.value})} required />
             </div>
             <div className="input-group">
-              <label>Yangi parolni tasdiqlang</label>
+              <label>{t('confirm_password')}</label>
               <input type="password" value={passData.confirm_password} onChange={e => setPassData({...passData, confirm_password: e.target.value})} required />
             </div>
             <button type="submit" className="btn btn-secondary" style={{ width: '100%', marginTop: '8px' }}>
-              O'zgartirish
+              {t('change_password')}
             </button>
           </form>
         </div>

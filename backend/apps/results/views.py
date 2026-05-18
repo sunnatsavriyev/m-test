@@ -178,12 +178,12 @@ class TestSubmitView(APIView):
 class DashboardStatsView(APIView):
     def get(self, request):
         # 10 eng ko'p test ishlagan xizmatlar (by count of results)
-        top_departments = TestResult.objects.values('user__department')\
+        top_departments = TestResult.objects.values('user__department', 'user__department__name')\
             .annotate(test_count=Count('id'), avg_score=Avg('score'))\
             .order_by('-test_count')[:10]
             
         # Umumiy reyting (Top 10 users by average score)
-        global_ranking = TestResult.objects.values('user__username', 'user__first_name', 'user__last_name', 'user__department')\
+        global_ranking = TestResult.objects.values('user__username', 'user__first_name', 'user__last_name', 'user__department', 'user__department__name')\
             .annotate(avg_score=Avg('score'), tests_done=Count('id'))\
             .order_by('-avg_score', '-tests_done')[:10]
             

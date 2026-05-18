@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { ChevronLeft, Calendar, Award, CheckCircle2, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
+import Loading from '../components/Loading';
 
 const TestHistory = () => {
   const { id } = useParams();
@@ -39,7 +40,7 @@ const TestHistory = () => {
     fetchData();
   }, [id, API_URL]);
 
-  if (loading) return <div className="loading">Yuklanmoqda...</div>;
+  if (loading) return <Loading fullPage={false} />;
 
   return (
     <div className="animate-fade-in" style={{ maxWidth: '1000px', margin: '0 auto' }}>

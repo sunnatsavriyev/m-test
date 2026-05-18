@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { UserPlus, Edit2, Trash2, Search } from 'lucide-react';
 import { motion } from 'framer-motion';
+import Loading from '../components/Loading';
 
 import { useNavigate } from 'react-router-dom';
 
@@ -94,6 +95,8 @@ const UserManagement = () => {
       }
     }
   };
+
+  if (loading) return <Loading fullPage={false} />;
 
   return (
     <div className="animate-fade-in">

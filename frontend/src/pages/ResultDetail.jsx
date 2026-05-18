@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { CheckCircle, AlertTriangle, ArrowLeft, Clock, User, FileText } from 'lucide-react';
+import Loading from '../components/Loading';
 
 const ResultDetail = () => {
   const { id } = useParams();
@@ -28,7 +29,7 @@ const ResultDetail = () => {
     fetchResult();
   }, [id, API_URL]);
 
-  if (loading) return <div className="main-content">Yuklanmoqda...</div>;
+  if (loading) return <Loading fullPage={false} />;
   if (!result) return <div className="main-content">Natija topilmadi.</div>;
 
   return (

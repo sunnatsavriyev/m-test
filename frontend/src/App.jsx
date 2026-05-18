@@ -13,13 +13,16 @@ import TestInterface from './pages/TestInterface';
 import Profile from './pages/Profile';
 import ResultDetail from './pages/ResultDetail';
 import TestHistory from './pages/TestHistory';
+import Settings from './pages/Settings';
 import Sidebar from './components/Sidebar';
 import { ToastProvider } from './components/Toast';
+import Loading from './components/Loading';
+import { SettingsProvider } from './context/SettingsContext';
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const { user, loading } = useAuth();
 
-  if (loading) return <div>Yuklanmoqda...</div>;
+  if (loading) return <Loading />;
   if (!user) return <Navigate to="/login" />;
   
   if (allowedRoles && !allowedRoles.includes(user.role)) {
@@ -95,6 +98,12 @@ const AppContent = () => {
             </ProtectedRoute>
           } />
 
+          <Route path="/settings" element={
+            <ProtectedRoute>
+              <Settings />
+            </ProtectedRoute>
+          } />
+
           <Route path="/result/:id" element={
             <ProtectedRoute>
               <ResultDetail />
@@ -114,11 +123,13 @@ const AppContent = () => {
 
 function App() {
   return (
-    <AuthProvider>
-      <ToastProvider>
-        <AppContent />
-      </ToastProvider>
-    </AuthProvider>
+    <SettingsProvider>
+      <AuthProvider>
+        <ToastProvider>
+          <AppContent />
+        </ToastProvider>
+      </AuthProvider>
+    </SettingsProvider>
   );
 }
 

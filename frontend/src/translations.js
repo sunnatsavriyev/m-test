@@ -1,0 +1,260 @@
+export const translations = {
+  uz: {
+    // Sidebar
+    dashboard: "Dashboard",
+    employees: "Xodimlar",
+    departments: "Xizmatlar",
+    monitoring: "Monitoring",
+    tests: "Testlar",
+    profile: "Profil",
+    settings: "Sozlamalar",
+    logout: "Chiqish",
+
+    // Common
+    save: "Saqlash",
+    cancel: "Bekor qilish",
+    edit: "Tahrirlash",
+    delete: "O'chirish",
+    actions: "Amallar",
+    confirm_delete: "Rostdan ham ushbu elementni o'chirmoqchimisiz?",
+    error: "Xatolik yuz berdi",
+    success: "Muvaffaqiyatli bajarildi",
+
+    // Login
+    login_title: "METRO TEST",
+    login_subtitle: "Tizimga kirish",
+    username: "Foydalanuvchi nomi",
+    password: "Parol",
+    login_btn: "Kirish",
+    login_loading: "Kirilmoqda...",
+
+    // Dashboard
+    db_title: "Dashboard",
+    db_subtitle: "Umumiy statistika va natijalar",
+    total_users: "Jami foydalanuvchilar",
+    total_tests: "Topshirilgan testlar",
+    active_services: "Faol xizmatlar",
+    chart_title: "Xizmatlar bo'yicha testlar soni",
+    chart_hover: "Testlar soni",
+    ranking_title: "Umumiy Reyting",
+    rank: "O'rin",
+
+    // Test List
+    test_title: "Testlar",
+    test_subtitle: "Mavjud testlar ro'yxati",
+    new_test: "Yangi test yaratish",
+    results: "Natijalar",
+    start_test: "Testni boshlash",
+    edit_test: "Testni tahrirlash",
+    test_name: "Test nomi",
+    service: "Xizmat (Department)",
+    time_limit: "Vaqt (daqiqa)",
+    questions_count: "savol",
+    minutes_count: "daqiqa",
+
+    // Settings
+    settings_title: "Sozlamalar",
+    settings_subtitle: "Dastur interfeysi va tillarini sozlash",
+    select_lang: "Tizim tili",
+    select_theme: "Mavzu rejimi",
+    light_mode: "Yorug' rejim (Oq)",
+    dark_mode: "Qorong'u rejim (Qora)",
+
+    // Profile
+    profile_title: "Profil",
+    profile_subtitle: "Shaxsiy ma'lumotlarni boshqarish",
+    first_name: "Ism",
+    last_name: "Familiya",
+    change_password: "Parolni o'zgartirish",
+    old_password: "Eski parol",
+    new_password: "Yangi parol",
+    confirm_password: "Yangi parolni tasdiqlang",
+    profile_success: "Profil ma'lumotlari yangilandi!",
+    password_success: "Parol muvaffaqiyatli o'zgartirildi!",
+    avatar_success: "Profil rasmi yangilandi!",
+    no_dept: "Xizmat biriktirilmagan",
+
+    // Monitoring
+    mon_title: "Monitoring",
+    mon_subtitle: "Test natijalari va statistikasi",
+    search_placeholder: "Ism, xizmat yoki test nomi bo'yicha qidirish...",
+    user: "Foydalanuvchi",
+    date: "Sana",
+    status: "Status",
+    clean: "Toza",
+    cheated: "Aldash holati",
+    reset_confirm: "Haqiqatdan bu natijani o'chirib, qayta topshirishga ruxsat bermoqchimisiz?",
+  },
+  ru: {
+    // Sidebar
+    dashboard: "Дашборд",
+    employees: "Сотрудники",
+    departments: "Службы",
+    monitoring: "Мониторинг",
+    tests: "Тесты",
+    profile: "Профиль",
+    settings: "Настройки",
+    logout: "Выйти",
+
+    // Common
+    save: "Сохранить",
+    cancel: "Отмена",
+    edit: "Редактировать",
+    delete: "Удалить",
+    actions: "Действия",
+    confirm_delete: "Вы уверены, что хотите удалить этот элемент?",
+    error: "Произошла ошибка",
+    success: "Успешно выполнено",
+
+    // Login
+    login_title: "METRO TEST",
+    login_subtitle: "Вход в систему",
+    username: "Имя пользователя",
+    password: "Пароль",
+    login_btn: "Войти",
+    login_loading: "Вход...",
+
+    // Dashboard
+    db_title: "Дашборд",
+    db_subtitle: "Общая статистика и результаты",
+    total_users: "Всего пользователей",
+    total_tests: "Пройдено тестов",
+    active_services: "Активные службы",
+    chart_title: "Количество тестов по службам",
+    chart_hover: "Количество тестов",
+    ranking_title: "Общий рейтинг",
+    rank: "Место",
+
+    // Test List
+    test_title: "Тесты",
+    test_subtitle: "Список доступных тестов",
+    new_test: "Создать новый тест",
+    results: "Результаты",
+    start_test: "Начать тест",
+    edit_test: "Редактировать тест",
+    test_name: "Название теста",
+    service: "Служба (Отдел)",
+    time_limit: "Время (минуты)",
+    questions_count: "вопросов",
+    minutes_count: "мин",
+
+    // Settings
+    settings_title: "Настройки",
+    settings_subtitle: "Настройка интерфейса и языка программы",
+    select_lang: "Язык системы",
+    select_theme: "Режим темы",
+    light_mode: "Светлый режим (Белый)",
+    dark_mode: "Темный режим (Черный)",
+
+    // Profile
+    profile_title: "Профиль",
+    profile_subtitle: "Управление личными данными",
+    first_name: "Имя",
+    last_name: "Фамилия",
+    change_password: "Изменить пароль",
+    old_password: "Старый пароль",
+    new_password: "Новый пароль",
+    confirm_password: "Подтвердите новый пароль",
+    profile_success: "Данные профиля обновлены!",
+    password_success: "Пароль успешно изменен!",
+    avatar_success: "Фото профиля обновлено!",
+    no_dept: "Служба не назначена",
+
+    // Monitoring
+    mon_title: "Мониторинг",
+    mon_subtitle: "Результаты тестов и статистика",
+    search_placeholder: "Поиск по имени, службе или тесту...",
+    user: "Пользователь",
+    date: "Дата",
+    status: "Статус",
+    clean: "Чисто",
+    cheated: "Попытка обхода",
+    reset_confirm: "Вы действительно хотите удалить этот результат и разрешить пересдачу?",
+  },
+  en: {
+    // Sidebar
+    dashboard: "Dashboard",
+    employees: "Employees",
+    departments: "Services",
+    monitoring: "Monitoring",
+    tests: "Tests",
+    profile: "Profile",
+    settings: "Settings",
+    logout: "Logout",
+
+    // Common
+    save: "Save",
+    cancel: "Cancel",
+    edit: "Edit",
+    delete: "Delete",
+    actions: "Actions",
+    confirm_delete: "Are you sure you want to delete this item?",
+    error: "An error occurred",
+    success: "Successfully completed",
+
+    // Login
+    login_title: "METRO TEST",
+    login_subtitle: "Login to System",
+    username: "Username",
+    password: "Password",
+    login_btn: "Login",
+    login_loading: "Logging in...",
+
+    // Dashboard
+    db_title: "Dashboard",
+    db_subtitle: "General statistics and results",
+    total_users: "Total Users",
+    total_tests: "Tests Taken",
+    active_services: "Active Services",
+    chart_title: "Number of Tests by Service",
+    chart_hover: "Test Count",
+    ranking_title: "Global Ranking",
+    rank: "Rank",
+
+    // Test List
+    test_title: "Tests",
+    test_subtitle: "List of available tests",
+    new_test: "Create New Test",
+    results: "Results",
+    start_test: "Start Test",
+    edit_test: "Edit Test",
+    test_name: "Test Name",
+    service: "Service (Department)",
+    time_limit: "Time Limit (minutes)",
+    questions_count: "questions",
+    minutes_count: "mins",
+
+    // Settings
+    settings_title: "Settings",
+    settings_subtitle: "Configure application interface and language",
+    select_lang: "System Language",
+    select_theme: "Theme Mode",
+    light_mode: "Light Mode (White)",
+    dark_mode: "Dark Mode (Black)",
+
+    // Profile
+    profile_title: "Profile",
+    profile_subtitle: "Manage personal information",
+    first_name: "First Name",
+    last_name: "Last Name",
+    change_password: "Change Password",
+    old_password: "Old Password",
+    new_password: "New Password",
+    confirm_password: "Confirm New Password",
+    profile_success: "Profile updated successfully!",
+    password_success: "Password changed successfully!",
+    avatar_success: "Avatar updated successfully!",
+    no_dept: "No service assigned",
+
+    // Monitoring
+    mon_title: "Monitoring",
+    mon_subtitle: "Test results and statistics",
+    search_placeholder: "Search by name, service or test...",
+    user: "User",
+    date: "Date",
+    status: "Status",
+    clean: "Clean",
+    cheated: "Cheating Attempt",
+    reset_confirm: "Are you sure you want to delete this result and allow retaking?",
+  }
+};
