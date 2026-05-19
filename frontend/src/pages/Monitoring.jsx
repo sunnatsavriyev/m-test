@@ -75,8 +75,8 @@ const Monitoring = () => {
         />
       </div>
 
-      <div className="card glass" style={{ padding: 0, overflow: 'hidden' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+      <div className="card glass responsive-table-container" style={{ padding: 0 }}>
+        <table style={{ width: '100%', minWidth: '1000px', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead>
             <tr style={{ background: 'var(--surface)', borderBottom: '1px solid var(--border)' }}>
               <th style={{ padding: '16px' }}>{t('user')}</th>

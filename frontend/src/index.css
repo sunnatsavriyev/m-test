@@ -230,18 +230,28 @@ input:focus {
   .sidebar .menu {
     display: flex;
     flex-direction: row;
-    justify-content: space-around;
+    justify-content: flex-start !important;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
     width: 100%;
     margin: 0;
+    gap: 8px;
+    scrollbar-width: none;
+  }
+  
+  .sidebar .menu::-webkit-scrollbar {
+    display: none;
   }
   
   .sidebar .menu a {
     flex-direction: column;
-    padding: 8px 4px;
+    padding: 8px 16px !important;
     font-size: 0.65rem;
     gap: 4px;
     margin-bottom: 0 !important;
     border-radius: 12px;
+    flex: 0 0 auto !important;
+    width: auto !important;
   }
 
   .main-content {
@@ -340,4 +350,24 @@ input:focus {
 .result-item-hover:hover {
   background: rgba(255, 255, 255, 0.08);
   transform: translateX(4px);
+}
+
+/* Responsive Table Utility */
+.responsive-table-container {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.responsive-table-container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.responsive-table-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.responsive-table-container::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
 }
